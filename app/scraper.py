@@ -26,7 +26,7 @@ def get_captcha_data(session):
         raise HTTPException(status_code=500, detail="Failed to load homepage")
 
     # Step 2: Wait for 2 seconds
-    time.sleep(2)
+    time.sleep(5)
 
     # Step 3: Parse the HTML to find the captcha image
     soup = BeautifulSoup(response.text, "html.parser")
