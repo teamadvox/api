@@ -5,6 +5,10 @@ from app.scraper import process_cino_form
 # Create FastAPI instance
 app = FastAPI()
 
+@app.get("/")
+def home():
+    return {"message":"Backend Running"}
+
 # Request body model
 class CinoRequest(BaseModel):
     cino: str
