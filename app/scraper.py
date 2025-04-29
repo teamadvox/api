@@ -5,6 +5,7 @@ import pytesseract
 from io import BytesIO
 from fastapi import HTTPException
 from bs4 import BeautifulSoup
+from app.logger import app_logger
 
 # URLs
 BASE_URL = "https://services.ecourts.gov.in/ecourtindia_v6/?p=cnr_status/searchByCNR/"
@@ -20,13 +21,17 @@ HEADERS = {
 }
 
 def get_captcha_data(session):
+    app_logger.info("Getting Captcha")
     # Step 1: Open the homepage
     response = session.get(HOME_URL, headers=HEADERS)
     if response.status_code != 200:
         raise HTTPException(status_code=500, detail="Failed to load homepage")
+    
+    app_logger.info("Response Code: ", response.status_code)
+    app_logger.info(response.text)
 
     # Step 2: Wait for 2 seconds
-    time.sleep(5)
+    time.sleep(2)
 
     # Step 3: Parse the HTML to find the captcha image
     soup = BeautifulSoup(response.text, "html.parser")
