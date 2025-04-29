@@ -21,14 +21,10 @@ HEADERS = {
 }
 
 def get_captcha_data(session):
-    app_logger.info("Getting Captcha")
     # Step 1: Open the homepage
     response = session.get(HOME_URL, headers=HEADERS)
     if response.status_code != 200:
         raise HTTPException(status_code=500, detail="Failed to load homepage")
-    
-    app_logger.info("Response Code: ", response.status_code)
-    app_logger.info(response.text)
 
     # Step 2: Wait for 2 seconds
     time.sleep(2)
@@ -36,15 +32,16 @@ def get_captcha_data(session):
     # Step 3: Parse the HTML to find the captcha image
     soup = BeautifulSoup(response.text, "html.parser")
     img_tag = soup.find("img", {"id": "captcha_image"})
-
+    app_logger.info("img_tag: ", img_tag)
     if not img_tag or not img_tag.get("src"):
         raise HTTPException(status_code=500, detail="Captcha image not found on homepage")
 
     # Step 4: Build full URL
     captcha_img_url = "https://services.ecourts.gov.in" + img_tag['src']
-
+    app_logger.info("captcha_img_url: ", captcha_img_url)
     # Also extract app_token hidden input if needed
     app_token_input = soup.find("input", {"id": "app_token"})
+    app_logger.info("app_token_input: ", app_token_input)
     if app_token_input and app_token_input.get("value"):
         app_token = app_token_input["value"]
     else:
@@ -54,12 +51,14 @@ def get_captcha_data(session):
 
 def solve_captcha(session, captcha_img_url):
     captcha_response = session.get(captcha_img_url, headers=HEADERS)
+    app_logger.info("captcha_response.status_code: ", captcha_response.status_code)
     if captcha_response.status_code != 200:
         raise HTTPException(status_code=500, detail="Failed to download captcha image")
 
     captcha_image = Image.open(BytesIO(captcha_response.content))
     captcha_text = pytesseract.image_to_string(captcha_image).strip()
-    print(captcha_text)
+    
+    app_logger.info("captcha_text: ", captcha_text)
     return captcha_text
 
 def submit_form(session, cino, fcaptcha_code, app_token):
@@ -69,7 +68,9 @@ def submit_form(session, cino, fcaptcha_code, app_token):
         'ajax_req': 'true',
         'App_token': app_token,
     }
+    app_logger.info("Sending captcha and other details...")
     response = session.post(BASE_URL, headers=HEADERS, data=data)
+    app_logger.info("response.status_code: ", response.status_code)
     return response
 
 def process_cino_form(cino):
