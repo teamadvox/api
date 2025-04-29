@@ -5,7 +5,7 @@ import pytesseract
 from io import BytesIO
 from fastapi import HTTPException
 from bs4 import BeautifulSoup
-from logger import app_logger
+from api.app.logger import app_logger
 
 # URLs
 BASE_URL = "https://services.ecourts.gov.in/ecourtindia_v6/?p=cnr_status/searchByCNR/"

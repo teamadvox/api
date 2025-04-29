@@ -1,13 +1,13 @@
 from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware  # ⬅️ Add this
+from fastapi.middleware.cors import CORSMiddleware  # Add this
 from pydantic import BaseModel
-from scraper import process_cino_form
-from logger import app_logger
+from api.app.scraper import process_cino_form
+from api.app.logger import app_logger
 
 # Create FastAPI instance
 app = FastAPI()
 
-# ✅ Add CORS Middleware
+# Add CORS Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Allow your React dev origin
