@@ -1,28 +1,26 @@
-# Step 1: Use an official Python image as a base
+# Use an official Python base image
 FROM python:3.11-slim
 
-# Step 2: Install Tesseract and other required dependencies
+# Install system dependencies including tesseract
 RUN apt-get update && apt-get install -y \
     tesseract-ocr \
+    libglib2.0-0 \
     libsm6 \
+    libxrender1 \
     libxext6 \
-    libxrender-dev \
     && apt-get clean
 
-# Step 3: Set the working directory in the container
+# Set working directory
 WORKDIR /app
 
-# Step 4: Copy the requirements.txt to the working directory
-COPY requirements.txt .
+# Copy project files
+COPY . /app
 
-# Step 5: Install Python dependencies
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Step 6: Copy the entire app into the working directory
-COPY . .
-
-# Step 7: Expose the port that Render has configured for your app
+# Expose port (use same as your uvicorn command)
 EXPOSE 10000
 
-# Step 8: Run the FastAPI app with Uvicorn on port 10000
+# Start FastAPI app using Uvicorn
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "10000"]
