@@ -21,44 +21,43 @@ HEADERS = {
 }
 
 def get_captcha_data(session):
-    # Step 1: Open the homepage
     response = session.get(HOME_URL, headers=HEADERS)
     if response.status_code != 200:
         raise HTTPException(status_code=500, detail="Failed to load homepage")
 
-    # Step 2: Wait for 2 seconds
     time.sleep(2)
 
-    # Step 3: Parse the HTML to find the captcha image
     soup = BeautifulSoup(response.text, "html.parser")
     img_tag = soup.find("img", {"id": "captcha_image"})
-    app_logger.info("img_tag: ", img_tag)
+    app_logger.info("img_tag: %s", img_tag)
+
     if not img_tag or not img_tag.get("src"):
         raise HTTPException(status_code=500, detail="Captcha image not found on homepage")
 
-    # Step 4: Build full URL
     captcha_img_url = "https://services.ecourts.gov.in" + img_tag['src']
-    app_logger.info("captcha_img_url: ", captcha_img_url)
-    # Also extract app_token hidden input if needed
+    app_logger.info("captcha_img_url: %s", captcha_img_url)
+
     app_token_input = soup.find("input", {"id": "app_token"})
-    app_logger.info("app_token_input: ", app_token_input)
+    app_logger.info("app_token_input: %s", app_token_input)
+
     if app_token_input and app_token_input.get("value"):
         app_token = app_token_input["value"]
     else:
-        app_token = ""  # Some pages may not expose it immediately
+        app_token = ""
 
     return captcha_img_url, app_token
 
 def solve_captcha(session, captcha_img_url):
     captcha_response = session.get(captcha_img_url, headers=HEADERS)
-    app_logger.info("captcha_response.status_code: ", captcha_response.status_code)
+    app_logger.info("captcha_response.status_code: %s", captcha_response.status_code)
+
     if captcha_response.status_code != 200:
         raise HTTPException(status_code=500, detail="Failed to download captcha image")
 
     captcha_image = Image.open(BytesIO(captcha_response.content))
     captcha_text = pytesseract.image_to_string(captcha_image).strip()
-    
-    app_logger.info("captcha_text: ", captcha_text)
+
+    app_logger.info("captcha_text: %s", captcha_text)
     return captcha_text
 
 def submit_form(session, cino, fcaptcha_code, app_token):
@@ -70,7 +69,7 @@ def submit_form(session, cino, fcaptcha_code, app_token):
     }
     app_logger.info("Sending captcha and other details...")
     response = session.post(BASE_URL, headers=HEADERS, data=data)
-    app_logger.info("response.status_code: ", response.status_code)
+    app_logger.info("response.status_code: %s", response.status_code)
     return response
 
 def process_cino_form(cino):
@@ -89,4 +88,5 @@ def process_cino_form(cino):
     except HTTPException as e:
         raise e
     except Exception as e:
+        app_logger.error("Unhandled exception: %s", str(e))
         raise HTTPException(status_code=500, detail=str(e))
