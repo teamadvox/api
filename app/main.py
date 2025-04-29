@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from app.scraper import process_cino_form
-from app.logger import app_logger
+from scraper import process_cino_form
+from logger import app_logger
 
 # Create FastAPI instance
 app = FastAPI()
